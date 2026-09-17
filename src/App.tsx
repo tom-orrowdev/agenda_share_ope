@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react"
-import { projectId } from "../utils/supabase/info"
+import { projectId, publicAnonKey } from "../utils/supabase/info"
 
 type Category = "camion" | "secouriste" | "note" | "urgent"
 
@@ -27,6 +27,7 @@ const DAYS_SHORT = ["L","M","M","J","V","S","D"]
 const DAYS_FULL  = ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"]
 
 const API = `https://${projectId}.supabase.co/functions/v1/make-server-dfb18bbe`
+const AUTH_HEADERS = { apikey: publicAnonKey, Authorization: `Bearer ${publicAnonKey}` }
 
 function daysInMonth(y: number, m: number) { return new Date(y, m + 1, 0).getDate() }
 function firstDow(y: number, m: number) { const d = new Date(y, m, 1).getDay(); return d === 0 ? 6 : d - 1 }
@@ -64,7 +65,7 @@ export default function App() {
   const fetchAnnotations = useCallback(async (silent = false) => {
     try {
       if (!silent) setSyncStatus("loading")
-      const res = await fetch(`${API}/annotations`)
+      const res = await fetch(`${API}/annotations`, { headers: AUTH_HEADERS })
       if (!res.ok) throw new Error()
       const data: AnnotationsMap = await res.json()
       const serialized = JSON.stringify(data)
@@ -104,7 +105,7 @@ export default function App() {
     try {
       await fetch(`${API}/annotations/${selected}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...AUTH_HEADERS },
         body: JSON.stringify(a),
       })
       setSyncStatus("ok")
@@ -121,7 +122,7 @@ export default function App() {
     setSyncStatus("saving")
     savingRef.current = true
     try {
-      await fetch(`${API}/annotations/${date}/${id}`, { method: "DELETE" })
+      await fetch(`${API}/annotations/${date}/${id}`, { method: "DELETE", headers: AUTH_HEADERS })
       setSyncStatus("ok")
     } catch {
       setSyncStatus("error")
