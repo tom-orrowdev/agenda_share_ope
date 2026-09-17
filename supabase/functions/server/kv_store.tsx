@@ -13,8 +13,8 @@ CREATE TABLE kv_store_dfb18bbe (
 import { createClient } from "jsr:@supabase/supabase-js@2.49.8";
 
 const client = () => createClient(
-  Deno.env.get("SUPABASE_URL"),
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"),
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
 // Set stores a key-value pair in the database.
