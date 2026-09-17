@@ -27,7 +27,7 @@ const DAYS_SHORT = ["L","M","M","J","V","S","D"]
 const DAYS_FULL  = ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"]
 
 const API = `https://${projectId}.supabase.co/functions/v1/make-server-dfb18bbe`
-const AUTH_HEADERS = { apikey: publicAnonKey, Authorization: `Bearer ${publicAnonKey}` }
+const AUTH_HEADERS = { Authorization: `Bearer ${publicAnonKey}` }
 
 function daysInMonth(y: number, m: number) { return new Date(y, m + 1, 0).getDate() }
 function firstDow(y: number, m: number) { const d = new Date(y, m, 1).getDay(); return d === 0 ? 6 : d - 1 }
