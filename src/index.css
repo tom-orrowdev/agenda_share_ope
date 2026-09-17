@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+@theme inline {
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --color-background: #0b1220;
+  --color-foreground: #e2e8f0;
+  --color-card: #131f30;
+  --color-card-foreground: #e2e8f0;
+  --color-primary: #f97316;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #1e3a5f;
+  --color-secondary-foreground: #93c5fd;
+  --color-muted: #182030;
+  --color-muted-foreground: #64748b;
+  --color-accent: #f97316;
+  --color-accent-foreground: #ffffff;
+  --color-border: #1e2d42;
+  --color-ring: #f97316;
+  --radius: 4px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #0b1220;
+  color: #e2e8f0;
+}
+
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+textarea::placeholder {
+  color: #334155;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.4);
+}

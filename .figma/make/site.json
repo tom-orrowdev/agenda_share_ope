@@ -1,0 +1,10 @@
+{
+  "description": "Manage trucks and rescuers throughout 2026 with a flexible calendar that allows extensive annotations for efficient scheduling and tracking.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
