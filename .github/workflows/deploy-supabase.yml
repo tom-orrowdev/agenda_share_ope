@@ -23,7 +23,7 @@ jobs:
           deno-version: v2.x
 
       - name: Type-check edge function
-        run: deno check supabase/functions/server/index.tsx
+        run: deno check --node-modules-dir=none supabase/functions/server/index.tsx
 
   deploy:
     name: Deploy to Supabase
