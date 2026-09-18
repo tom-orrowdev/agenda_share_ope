@@ -56,6 +56,7 @@ export default function App() {
   const [newText, setNewText] = useState("")
   const [newTime, setNewTime] = useState("")
   const [newCat, setNewCat] = useState<Category>("camion")
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [tooltip, setTooltip] = useState<{ key: string; x: number; y: number } | null>(null)
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("loading")
   const tooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -90,11 +91,56 @@ export default function App() {
     return () => clearInterval(id)
   }, [fetchAnnotations])
 
+  // Leaving the selected day cancels any in-progress edit
+  useEffect(() => {
+    setEditingId(null)
+    setNewText("")
+    setNewTime("")
+  }, [selected])
+
   const now = new Date()
   const todayKey = toKey(now.getFullYear(), now.getMonth(), now.getDate())
 
-  const addAnnotation = async () => {
+  const startEdit = (a: Annotation) => {
+    setEditingId(a.id)
+    setNewCat(a.category)
+    setNewText(a.text)
+    setNewTime(a.time)
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setNewText("")
+    setNewTime("")
+  }
+
+  const saveAnnotation = async () => {
     if (!newText.trim() || !selected) return
+    if (editingId) {
+      const id = editingId
+      const updates = { category: newCat, text: newText.trim(), time: newTime }
+      // Optimistic update
+      setAnnotations(p => ({ ...p, [selected]: (p[selected] || []).map(a => (a.id === id ? { ...a, ...updates } : a)) }))
+      setEditingId(null)
+      setNewText("")
+      setNewTime("")
+      setSyncStatus("saving")
+      savingRef.current = true
+      try {
+        await fetch(`${API}/annotations/${selected}/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", ...AUTH_HEADERS },
+          body: JSON.stringify(updates),
+        })
+        setSyncStatus("ok")
+      } catch {
+        setSyncStatus("error")
+      } finally {
+        savingRef.current = false
+      }
+      return
+    }
+
     const a: Annotation = { id: Date.now().toString(), category: newCat, text: newText.trim(), time: newTime }
     // Optimistic update
     setAnnotations(p => ({ ...p, [selected]: [...(p[selected] || []), a] }))
@@ -117,6 +163,7 @@ export default function App() {
   }
 
   const removeAnnotation = async (date: string, id: string) => {
+    if (editingId === id) cancelEdit()
     // Optimistic update
     setAnnotations(p => ({ ...p, [date]: (p[date] || []).filter(a => a.id !== id) }))
     setSyncStatus("saving")
@@ -370,15 +417,24 @@ export default function App() {
                       <span className="text-[9px] font-mono font-bold uppercase tracking-widest" style={{ color: CATEGORIES[a.category].color }}>{CATEGORIES[a.category].label}</span>
                       {a.time && <span className="text-[9px] font-mono text-slate-500">{a.time}</span>}
                     </div>
-                    <p className="text-[12px] text-slate-300 leading-relaxed">{a.text}</p>
-                    <button onClick={() => removeAnnotation(selected, a.id)}
-                      className="absolute top-2 right-2 text-slate-700 hover:text-rose-400 transition-colors opacity-0 group-hover:opacity-100 text-base leading-none">×</button>
+                    <p className="text-[12px] text-slate-300 leading-relaxed pr-10">{a.text}</p>
+                    <div className="absolute top-2 right-2 flex items-center gap-2 opacity-0 group-hover:opacity-100">
+                      <button onClick={() => startEdit(a)}
+                        className="text-slate-700 hover:text-orange-400 transition-colors text-sm leading-none">✎</button>
+                      <button onClick={() => removeAnnotation(selected, a.id)}
+                        className="text-slate-700 hover:text-rose-400 transition-colors text-base leading-none">×</button>
+                    </div>
                   </div>
                 ))}
               </div>
 
               <div className="border-t border-[#1e2d42] p-4 flex-shrink-0 space-y-3">
-                <p className="text-[10px] font-mono text-slate-700 uppercase tracking-widest">Nouvelle annotation</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] font-mono text-slate-700 uppercase tracking-widest">{editingId ? "Modifier l'annotation" : "Nouvelle annotation"}</p>
+                  {editingId && (
+                    <button onClick={cancelEdit} className="text-[10px] font-mono text-slate-600 hover:text-slate-400 transition-colors">Annuler</button>
+                  )}
+                </div>
                 <div className="grid grid-cols-2 gap-1">
                   {(Object.keys(CATEGORIES) as Category[]).map(cat => (
                     <button key={cat} onClick={() => setNewCat(cat)}
@@ -391,13 +447,13 @@ export default function App() {
                 <input type="time" value={newTime} onChange={e => setNewTime(e.target.value)}
                   className="w-full bg-[#182030] border border-[#1e2d42] rounded px-2.5 py-1.5 text-[11px] font-mono text-slate-300 focus:outline-none focus:border-orange-500/60 transition-colors" />
                 <textarea value={newText} onChange={e => setNewText(e.target.value)}
-                  onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) addAnnotation() }}
+                  onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) saveAnnotation() }}
                   placeholder="Annotation libre..." rows={3}
                   className="w-full bg-[#182030] border border-[#1e2d42] rounded px-2.5 py-1.5 text-[12px] text-slate-300 focus:outline-none focus:border-orange-500/60 transition-colors resize-none scrollbar-hide"
                   style={{ fontFamily: "'Inter', sans-serif" }} />
-                <button onClick={addAnnotation} disabled={!newText.trim() || syncStatus === "saving"}
+                <button onClick={saveAnnotation} disabled={!newText.trim() || syncStatus === "saving"}
                   className="w-full py-1.5 rounded text-[11px] font-mono font-bold bg-orange-500 text-white hover:bg-orange-600 transition-colors disabled:opacity-25 disabled:cursor-not-allowed tracking-wide">
-                  {syncStatus === "saving" ? "Sauvegarde…" : "Ajouter →"}
+                  {syncStatus === "saving" ? "Sauvegarde…" : editingId ? "Enregistrer →" : "Ajouter →"}
                 </button>
               </div>
             </div>
