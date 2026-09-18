@@ -43,6 +43,8 @@ function uniqueCats(anns: Annotation[]): Category[] {
 }
 
 const YEAR = 2026
+const FIRST_MONTH = 8  // Septembre
+const LAST_MONTH = 11  // Décembre
 const POLL_INTERVAL = 5000
 
 type SyncStatus = "idle" | "loading" | "saving" | "error" | "ok"
@@ -52,7 +54,7 @@ export default function App() {
   const [selected, setSelected] = useState<string | null>(null)
   const [filter, setFilter] = useState<Category | "all">("all")
   const [view, setView] = useState<"year" | "month">("year")
-  const [activeMonth, setActiveMonth] = useState(new Date().getMonth())
+  const [activeMonth, setActiveMonth] = useState(() => Math.min(Math.max(new Date().getMonth(), FIRST_MONTH), LAST_MONTH))
   const [newText, setNewText] = useState("")
   const [newTime, setNewTime] = useState("")
   const [newCat, setNewCat] = useState<Category>("camion")
@@ -213,18 +215,18 @@ export default function App() {
         className={["relative flex flex-col items-center rounded-sm pt-0.5 transition-all duration-100 overflow-hidden",
           isSel ? "ring-1 ring-orange-500/80" : "hover:brightness-125",
           isToday ? "ring-1 ring-orange-400" : ""].join(" ")}
-        style={{ backgroundColor: dom && anns.length ? CATEGORIES[dom].bg : undefined, minHeight: 28 }}
+        style={{ backgroundColor: dom && anns.length ? CATEGORIES[dom].bg : undefined, minHeight: 44 }}
       >
-        <span className={`text-[11px] leading-tight font-mono z-10 ${isToday ? "text-orange-400 font-bold" : anns.length ? "text-slate-200" : "text-slate-500"}`}>
+        <span className={`text-sm leading-tight font-mono z-10 ${isToday ? "text-orange-400 font-bold" : anns.length ? "text-slate-200" : "text-slate-500"}`}>
           {d}
         </span>
         {cats.length > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 flex h-[3px]">
+          <div className="absolute bottom-0 left-0 right-0 flex h-[4px]">
             {cats.map(cat => <div key={cat} className="flex-1 h-full" style={{ backgroundColor: CATEGORIES[cat].color }} />)}
           </div>
         )}
         {anns.some(a => a.category === "urgent") && (
-          <div className="absolute top-0.5 right-0.5 w-[5px] h-[5px] rounded-full bg-rose-500" />
+          <div className="absolute top-1 right-1 w-[6px] h-[6px] rounded-full bg-rose-500" />
         )}
       </button>
     )
@@ -237,13 +239,13 @@ export default function App() {
     for (let i = 0; i < fd; i++) cells.push(<div key={`e${i}`} />)
     for (let d = 1; d <= days; d++) cells.push(<DayCell key={d} y={YEAR} m={m} d={d} />)
     return (
-      <div className="bg-[#131f30] rounded border border-[#1e2d42] p-3 flex flex-col gap-2">
+      <div className="bg-[#131f30] rounded border border-[#1e2d42] p-4 flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-mono font-bold text-orange-400 uppercase tracking-widest">{MONTHS_FR[m]}</span>
-          <button onClick={() => { setActiveMonth(m); setView("month") }} className="text-[10px] font-mono text-slate-600 hover:text-orange-400 transition-colors px-1">↗</button>
+          <span className="text-sm font-mono font-bold text-orange-400 uppercase tracking-widest">{MONTHS_FR[m]}</span>
+          <button onClick={() => { setActiveMonth(m); setView("month") }} className="text-xs font-mono text-slate-600 hover:text-orange-400 transition-colors px-1">↗</button>
         </div>
-        <div className="grid grid-cols-7 gap-0.5">
-          {DAYS_SHORT.map((d, i) => <div key={i} className="text-center text-[9px] font-mono text-slate-700 font-semibold">{d}</div>)}
+        <div className="grid grid-cols-7 gap-1">
+          {DAYS_SHORT.map((d, i) => <div key={i} className="text-center text-[10px] font-mono text-slate-700 font-semibold">{d}</div>)}
           {cells}
         </div>
       </div>
@@ -303,9 +305,9 @@ export default function App() {
           <div className="flex items-center gap-3 mb-5">
             <button onClick={() => setView("year")} className="text-[11px] font-mono text-slate-600 hover:text-orange-400 transition-colors">← Vue annuelle</button>
             <div className="flex items-center gap-1">
-              <button onClick={() => setActiveMonth(m => Math.max(0, m - 1))} className="text-slate-600 hover:text-slate-300 px-2 py-1 rounded hover:bg-white/5 font-mono">‹</button>
+              <button onClick={() => setActiveMonth(m => Math.max(FIRST_MONTH, m - 1))} className="text-slate-600 hover:text-slate-300 px-2 py-1 rounded hover:bg-white/5 font-mono">‹</button>
               <h2 className="text-base font-mono font-bold text-white uppercase tracking-widest w-36 text-center">{MONTHS_FR[activeMonth]}</h2>
-              <button onClick={() => setActiveMonth(m => Math.min(11, m + 1))} className="text-slate-600 hover:text-slate-300 px-2 py-1 rounded hover:bg-white/5 font-mono">›</button>
+              <button onClick={() => setActiveMonth(m => Math.min(LAST_MONTH, m + 1))} className="text-slate-600 hover:text-slate-300 px-2 py-1 rounded hover:bg-white/5 font-mono">›</button>
             </div>
           </div>
           <div className="grid grid-cols-7 gap-1 mb-1">
@@ -381,8 +383,8 @@ export default function App() {
         <div className="flex-1 overflow-hidden flex flex-col">
           {view === "year" ? (
             <div className="flex-1 overflow-auto p-4 scrollbar-hide">
-              <div className="grid grid-cols-4 gap-3 max-w-6xl mx-auto">
-                {Array.from({ length: 12 }, (_, i) => <MiniMonth key={i} m={i} />)}
+              <div className="grid grid-cols-2 gap-4 max-w-6xl mx-auto">
+                {Array.from({ length: LAST_MONTH - FIRST_MONTH + 1 }, (_, i) => <MiniMonth key={FIRST_MONTH + i} m={FIRST_MONTH + i} />)}
               </div>
             </div>
           ) : <MonthView />}
