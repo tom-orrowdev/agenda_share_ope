@@ -1,5 +1,6 @@
 {
-  "description": "Manage trucks and rescuers throughout 2026 with a flexible calendar that allows extensive annotations for efficient scheduling and tracking.",
+  "title": "Protection Civile Paris Seine",
+  "description": "Planning des camions et secouristes de la Protection Civile Paris Seine, avec annotations pour un suivi efficace.",
   "robots": {
     "index": false
   },
