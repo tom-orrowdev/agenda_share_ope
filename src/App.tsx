@@ -13,7 +13,7 @@ interface Annotation {
 type AnnotationsMap = Record<string, Annotation[]>
 
 const CATEGORIES: Record<Category, { label: string; color: string; bg: string }> = {
-  camion:     { label: "Camion",     color: "#f97316", bg: "rgba(249,115,22,0.15)" },
+  camion:     { label: "Camion",     color: "#ff6600", bg: "rgba(255,102,0,0.15)" },
   secouriste: { label: "Secouriste", color: "#38bdf8", bg: "rgba(56,189,248,0.15)" },
   note:       { label: "Note",       color: "#4ade80", bg: "rgba(74,222,128,0.15)" },
   urgent:     { label: "Urgent",     color: "#f43f5e", bg: "rgba(244,63,94,0.15)"  },
@@ -323,7 +323,7 @@ export default function App() {
   const statusLabel: Record<SyncStatus, { label: string; color: string }> = {
     idle:    { label: "—",           color: "#475569" },
     loading: { label: "Chargement…", color: "#94a3b8" },
-    saving:  { label: "Sauvegarde…", color: "#f97316" },
+    saving:  { label: "Sauvegarde…", color: "#ff6600" },
     ok:      { label: "Synchronisé", color: "#4ade80" },
     error:   { label: "Erreur sync", color: "#f43f5e" },
   }
@@ -340,12 +340,13 @@ export default function App() {
       {/* Header */}
       <header className="flex items-center gap-3 px-4 py-2 border-b border-[#1e2d42] flex-shrink-0 flex-wrap">
         <div className="flex items-center gap-2 mr-2">
-          <div className="flex flex-col gap-[3px]">
-            <div className="w-4 h-[3px] bg-orange-500 rounded-full" />
-            <div className="w-3 h-[3px] bg-sky-400 rounded-full" />
-            <div className="w-4 h-[3px] bg-orange-500 rounded-full" />
-          </div>
-          <span className="font-mono font-bold text-sm tracking-[0.15em] text-white uppercase">Agenda 2026</span>
+          <svg width="22" height="22" viewBox="0 0 24 24" className="flex-shrink-0">
+            <circle cx="12" cy="12" r="11" fill="#ff6600" />
+            <polygon points="12,4.5 20.5,18.5 3.5,18.5" fill="#0b3d91" />
+            <rect x="10.6" y="10" width="2.8" height="7" fill="#fff" />
+            <rect x="7.5" y="12.6" width="9" height="2.2" fill="#fff" />
+          </svg>
+          <span className="font-mono font-bold text-sm tracking-[0.1em] text-white uppercase">Protection Civile Paris Seine</span>
         </div>
 
         <div className="flex items-center rounded overflow-hidden border border-[#1e2d42]">
