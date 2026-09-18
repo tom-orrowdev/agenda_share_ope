@@ -44,6 +44,17 @@ app.post("/make-server-dfb18bbe/annotations/:date", async (c) => {
   return c.json({ ok: true });
 });
 
+// Update a single annotation
+app.put("/make-server-dfb18bbe/annotations/:date/:id", async (c) => {
+  const date = c.req.param("date");
+  const id   = c.req.param("id");
+  const updates = await c.req.json();
+  const all = (await kv.get("agenda-2026-annotations")) ?? {};
+  if (all[date]) all[date] = all[date].map((a: any) => (a.id === id ? { ...a, ...updates, id } : a));
+  await kv.set("agenda-2026-annotations", all);
+  return c.json({ ok: true });
+});
+
 // Delete a single annotation
 app.delete("/make-server-dfb18bbe/annotations/:date/:id", async (c) => {
   const date = c.req.param("date");
